@@ -1,0 +1,62 @@
+@model List<OrganiserEventDto>
+@{
+    ViewData["Title"] = "Dashboard";
+    var upcoming = Model.Where(e => e.EventDate.Date >= DateTime.Today).OrderBy(e => e.EventDate).ToList();
+    var totalEnrolments = Model.Sum(e => e.EnrolmentCount);
+    var next = upcoming.FirstOrDefault();
+}
+<section class="rd-hero rd-hero-sm">
+    <h1>ORGANISER <span>DASHBOARD</span></h1>
+    <p>Everything happening across your events at a glance.</p>
+</section>
+
+<div class="row g-4 mb-4">
+    <div class="col-6 col-lg-3"><div class="rd-stat"><span>@Model.Count</span>Events created</div></div>
+    <div class="col-6 col-lg-3"><div class="rd-stat"><span>@upcoming.Count</span>Upcoming events</div></div>
+    <div class="col-6 col-lg-3"><div class="rd-stat"><span>@totalEnrolments</span>Total enrolments</div></div>
+    <div class="col-6 col-lg-3"><div class="rd-stat"><span>@(next != null ? next.EventDate.ToString("d MMM") : "-")</span>Next event date</div></div>
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="rd-section-title m-0">Your events</h2>
+    <a asp-action="CreateEvent" class="btn btn-rd">+ New event</a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="rd-empty">
+        <h3>You have not created any events yet</h3>
+        <p>Create your first event, then add categories so participants can enter.</p>
+        <a asp-action="CreateEvent" class="btn btn-rd">Create an event</a>
+    </div>
+}
+else
+{
+    <div class="rd-card p-0 table-responsive">
+        <table class="table rd-table align-middle mb-0">
+            <thead>
+                <tr><th>Event</th><th>Date</th><th>Type</th><th class="text-center">Enrolments</th><th class="text-center">Categories</th><th></th></tr>
+            </thead>
+            <tbody>
+                @foreach (var e in Model.OrderBy(e => e.EventDate < DateTime.Today).ThenBy(e => e.EventDate))
+                {
+                    bool past = e.EventDate.Date < DateTime.Today;
+                    <tr class="@(past ? "rd-row-past" : "")">
+                        <td>
+                            <span class="fw-semibold">@e.EventName</span>
+                            <div class="small text-muted">@e.Location &middot; @e.Distance.ToString("0.##") km</div>
+                        </td>
+                        <td>@e.EventDate.ToString("d MMM yyyy") @if (past) { <span class="rd-tag rd-tag-closed">Finished</span> }</td>
+                        <td>@e.EventType</td>
+                        <td class="text-center"><span class="rd-count">@e.EnrolmentCount</span></td>
+                        <td class="text-center">@e.CategoryCount</td>
+                        <td class="text-end text-nowrap">
+                            <a asp-action="Enrolments" asp-route-eventId="@e.EventID" class="btn btn-sm btn-rd-outline-dark">Enrolments</a>
+                            <a asp-action="Results" asp-route-eventId="@e.EventID" class="btn btn-sm btn-rd">Results</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

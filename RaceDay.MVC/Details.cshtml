@@ -1,0 +1,63 @@
+@model EventDetailsVm
+@{
+    ViewData["Title"] = Model.Event.EventName;
+    var e = Model.Event;
+    bool isPast = e.EventDate.Date < DateTime.Today;
+}
+<a asp-controller="Home" asp-action="Index" class="rd-back">&larr; All events</a>
+
+<div class="rd-detail">
+    @await Html.PartialAsync("_EventBanner", (e.BannerUrl, e.EventType, "rd-detail-banner"))
+    <div class="rd-detail-body">
+        <div class="rd-tags">
+            <span class="rd-tag rd-tag-@e.EventType.ToLowerInvariant()">@e.EventType</span>
+            <span class="rd-tag rd-tag-dist">@e.Distance.ToString("0.##") km</span>
+            @if (isPast)
+            {
+                <span class="rd-tag rd-tag-closed">Event finished</span>
+            }
+        </div>
+        <h1>@e.EventName</h1>
+        <p class="rd-meta">@e.EventDate.ToString("dddd, d MMMM yyyy") &middot; @e.Location</p>
+        <p>@e.Description</p>
+    </div>
+</div>
+
+<div class="rd-card mt-4">
+    <h2 class="rd-section-title">Choose your category</h2>
+
+    @if (!Model.Categories.Any())
+    {
+        <p class="text-muted mb-0">The organiser has not added any categories for this event yet. Please check back soon.</p>
+    }
+    else if (isPast)
+    {
+        <p class="text-muted mb-0">Entries are closed because this event has already taken place.</p>
+    }
+    else
+    {
+        <div class="row g-3">
+            @foreach (var c in Model.Categories)
+            {
+                bool already = Model.EnrolledCategoryIds.Contains(c.CategoryID);
+                <div class="col-md-6 col-lg-4">
+                    <div class="rd-category">
+                        <strong>@c.CategoryName</strong>
+                        @if (already)
+                        {
+                            <span class="status-badge status-confirmed">You're entered</span>
+                        }
+                        else
+                        {
+                            <form asp-controller="Events" asp-action="Enrol" method="post" class="m-0">
+                                <input type="hidden" name="eventId" value="@e.EventID" />
+                                <input type="hidden" name="categoryId" value="@c.CategoryID" />
+                                <button type="submit" class="btn btn-sm btn-rd">Enter this category</button>
+                            </form>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

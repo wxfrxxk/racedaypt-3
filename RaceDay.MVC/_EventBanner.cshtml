@@ -1,0 +1,13 @@
+@model (string? Url, string Type, string Css)
+@{
+    var resolved = Assets.Resolve(Model.Url);
+    var icon = Model.Type switch { "Cycle" => "🚴", "Walk" => "🚶", _ => "🏃" };
+}
+@if (resolved != null)
+{
+    <img src="@resolved" alt="Event banner" class="@Model.Css rd-banner-img" />
+}
+else
+{
+    <div class="@Model.Css rd-banner-fallback banner-@Model.Type.ToLowerInvariant()"><span>@icon</span></div>
+}

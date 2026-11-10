@@ -1,0 +1,16 @@
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger rd-alert" role="alert">
+        @if (ViewData.ModelState.TryGetValue(string.Empty, out var modelEntry) && modelEntry.Errors.Count > 0)
+        {
+            foreach (var err in modelEntry.Errors)
+            {
+                <div>@err.ErrorMessage</div>
+            }
+        }
+        else
+        {
+            <div>Please fix the highlighted fields and try again.</div>
+        }
+    </div>
+}

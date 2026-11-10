@@ -1,0 +1,8 @@
+@{
+    ViewData["Title"] = "Oops";
+}
+<div class="rd-empty">
+    <h1 class="rd-big-code">@(ViewBag.Code ?? "Oops")</h1>
+    <h3>@ViewBag.Message</h3>
+    <a asp-controller="Home" asp-action="Index" class="btn btn-rd mt-3">Back to home</a>
+</div>

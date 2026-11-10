@@ -1,0 +1,50 @@
+@model List<MyResultDto>
+@{
+    ViewData["Title"] = "My results";
+    string Ordinal(int n)
+    {
+        int mod100 = n % 100;
+        if (mod100 >= 11 && mod100 <= 13) return n + "th";
+        return (n % 10) switch { 1 => n + "st", 2 => n + "nd", 3 => n + "rd", _ => n + "th" };
+    }
+}
+<section class="rd-hero rd-hero-sm">
+    <h1>MY <span>RESULTS</span></h1>
+    <p>Your personal race history across every completed event.</p>
+</section>
+
+@if (!Model.Any())
+{
+    <div class="rd-empty">
+        <h3>No results yet</h3>
+        <p>Results appear here once an organiser publishes them after your event.</p>
+    </div>
+}
+else
+{
+    <div class="row g-4 mb-4">
+        <div class="col-md-4"><div class="rd-stat"><span>@Model.Count</span>Races finished</div></div>
+        <div class="col-md-4"><div class="rd-stat"><span>@Model.Min(r => r.Position)</span>Best position</div></div>
+        <div class="col-md-4"><div class="rd-stat"><span>@Model.Min(r => r.FinishTime).ToString(@"hh\:mm\:ss")</span>Fastest time</div></div>
+    </div>
+
+    <div class="rd-card p-0 table-responsive">
+        <table class="table rd-table align-middle mb-0">
+            <thead>
+                <tr><th>Event</th><th>Date</th><th>Category</th><th>Finish time</th><th>Position</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var r in Model)
+                {
+                    <tr>
+                        <td class="fw-semibold">@r.EventName</td>
+                        <td>@r.EventDate.ToString("d MMM yyyy")</td>
+                        <td>@r.CategoryName</td>
+                        <td class="rd-time">@r.FinishTime.ToString(@"hh\:mm\:ss")</td>
+                        <td><span class="rd-position">@Ordinal(r.Position)</span> <span class="text-muted">out of @r.TotalFinishers finishers</span></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

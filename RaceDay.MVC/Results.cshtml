@@ -1,0 +1,58 @@
+@model EnrolmentsVm
+@{
+    ViewData["Title"] = "Results";
+    bool finished = Model.Event.EventDate.Date <= DateTime.Today;
+    var eligible = Model.Enrolments.Where(e => e.Status != "Cancelled").ToList();
+}
+<a asp-action="Events" class="rd-back">&larr; Back to events</a>
+<h1 class="rd-page-title">RESULTS <span>&middot; @Model.Event.EventName</span></h1>
+<p class="rd-meta">@Model.Event.EventDate.ToString("d MMM yyyy") &middot; @Model.Event.Location</p>
+
+@if (!finished)
+{
+    <div class="alert alert-warning rd-alert">This event has not taken place yet. Results can be captured once it concludes.</div>
+}
+
+@if (!eligible.Any())
+{
+    <div class="rd-empty">
+        <h3>No enrolled participants</h3>
+        <p>There is nobody to capture results for yet.</p>
+    </div>
+}
+else
+{
+    <div class="rd-card p-0 table-responsive">
+        <table class="table rd-table align-middle mb-0">
+            <thead>
+                <tr><th>Participant</th><th>Category</th><th style="width:170px">Finish time (hh:mm:ss)</th><th style="width:120px">Position</th><th class="text-end"></th></tr>
+            </thead>
+            <tbody>
+                @foreach (var en in eligible)
+                {
+                    string formId = $"result-{en.RegistrationID}";
+                    <tr>
+                        <td class="fw-semibold">@en.ParticipantName</td>
+                        <td>@en.CategoryName</td>
+                        <td>
+                            <input form="@formId" name="finishTime" class="form-control form-control-sm" placeholder="00:42:15"
+                                   value="@(en.FinishTime.HasValue ? en.FinishTime.Value.ToString(@"hh\:mm\:ss") : "")" disabled="@(!finished)" />
+                        </td>
+                        <td>
+                            <input form="@formId" name="position" type="number" min="1" class="form-control form-control-sm"
+                                   value="@(en.Position.HasValue ? en.Position.Value.ToString() : "")" disabled="@(!finished)" />
+                        </td>
+                        <td class="text-end">
+                            <form id="@formId" asp-action="SaveResult" method="post" class="m-0">
+                                <input type="hidden" name="eventId" value="@Model.Event.EventID" />
+                                <input type="hidden" name="registrationId" value="@en.RegistrationID" />
+                                <input type="hidden" name="resultId" value="@(en.ResultID.HasValue ? en.ResultID.Value.ToString() : "")" />
+                                <button type="submit" class="btn btn-sm btn-rd" disabled="@(!finished)">@(en.ResultID.HasValue ? "Update" : "Publish")</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

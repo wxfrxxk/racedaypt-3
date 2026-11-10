@@ -1,0 +1,47 @@
+@model CategoriesVm
+@{
+    ViewData["Title"] = "Categories";
+}
+<a asp-action="Events" class="rd-back">&larr; Back to events</a>
+<h1 class="rd-page-title">CATEGORIES <span>&middot; @Model.Event.EventName</span></h1>
+<p class="rd-meta">@Model.Event.EventDate.ToString("d MMM yyyy") &middot; @Model.Event.Location</p>
+
+<div class="row g-4">
+    <div class="col-lg-5">
+        <div class="rd-card">
+            <h2 class="rd-section-title">Add a category</h2>
+            <p class="small text-muted">Use age groups or distances, for example Under 20, Senior, 10km or 21km.</p>
+            <form asp-action="AddCategory" method="post">
+                <input type="hidden" name="eventId" value="@Model.Event.EventID" />
+                <label class="form-label" for="categoryName">Category name</label>
+                <input id="categoryName" name="categoryName" maxlength="50" class="form-control mb-3" placeholder="e.g. 10km Senior" />
+                <button type="submit" class="btn btn-rd w-100">Add category</button>
+            </form>
+        </div>
+    </div>
+    <div class="col-lg-7">
+        <div class="rd-card">
+            <h2 class="rd-section-title">Categories for this event</h2>
+            @if (!Model.Categories.Any())
+            {
+                <p class="text-muted mb-0">No categories yet. Participants cannot enter until you add at least one.</p>
+            }
+            else
+            {
+                <ul class="list-unstyled m-0">
+                    @foreach (var c in Model.Categories)
+                    {
+                        <li class="rd-list-row">
+                            <span class="fw-semibold">@c.CategoryName</span>
+                            <form asp-action="DeleteCategory" method="post" class="m-0" data-confirm="Remove the category '@c.CategoryName'?">
+                                <input type="hidden" name="id" value="@c.CategoryID" />
+                                <input type="hidden" name="eventId" value="@Model.Event.EventID" />
+                                <button type="submit" class="btn btn-sm btn-danger-soft">Remove</button>
+                            </form>
+                        </li>
+                    }
+                </ul>
+            }
+        </div>
+    </div>
+</div>

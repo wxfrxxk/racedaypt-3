@@ -1,0 +1,72 @@
+@model HomeVm
+@{
+    ViewData["Title"] = "Upcoming events";
+}
+<section class="rd-hero">
+    <h1>UPCOMING <span>EVENTS</span></h1>
+    <p>@Model.TotalUpcoming upcoming events across South Africa. Pick your distance, pick your start line.</p>
+</section>
+
+<form method="get" asp-action="Index" class="rd-card rd-filters">
+    <div class="row g-3 align-items-end">
+        <div class="col-md-4">
+            <label class="form-label" for="search">Search</label>
+            <input id="search" name="search" value="@Model.Search" class="form-control" placeholder="Event name or location" />
+        </div>
+        <div class="col-md-3">
+            <label class="form-label" for="type">Event type</label>
+            <select id="type" name="type" class="form-select">
+                <option value="">All types</option>
+                @foreach (var t in new[] { "Run", "Walk", "Cycle" })
+                {
+                    <option value="@t" selected="@(Model.Type == t)">@t</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label" for="maxDistance">Distance</label>
+            <select id="maxDistance" name="maxDistance" class="form-select">
+                <option value="">Any distance</option>
+                @foreach (var d in new[] { 5, 10, 21.1m, 42.2m, 100 })
+                {
+                    <option value="@d" selected="@(Model.MaxDistance == (decimal)d)">Up to @d km</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2 d-flex gap-2">
+            <button type="submit" class="btn btn-rd flex-fill">Filter</button>
+            <a asp-action="Index" class="btn btn-rd-outline-dark">Reset</a>
+        </div>
+    </div>
+</form>
+
+@if (!Model.Events.Any())
+{
+    <div class="rd-empty">
+        <h3>No events match your filters</h3>
+        <p>Try a different search, or clear the filters to see everything coming up.</p>
+    </div>
+}
+else
+{
+    <div class="row g-4">
+        @foreach (var e in Model.Events)
+        {
+            <div class="col-md-6 col-lg-4">
+                <article class="rd-event-card">
+                    @await Html.PartialAsync("_EventBanner", (e.BannerUrl, e.EventType, "rd-card-banner"))
+                    <div class="rd-event-body">
+                        <div class="rd-tags">
+                            <span class="rd-tag rd-tag-@e.EventType.ToLowerInvariant()">@e.EventType</span>
+                            <span class="rd-tag rd-tag-dist">@e.Distance.ToString("0.##") km</span>
+                        </div>
+                        <h3>@e.EventName</h3>
+                        <p class="rd-meta">@e.EventDate.ToString("ddd, d MMM yyyy") &middot; @e.Location</p>
+                        <p class="rd-desc">@e.Description</p>
+                        <a asp-controller="Events" asp-action="Details" asp-route-id="@e.EventID" class="btn btn-rd w-100">View &amp; enter</a>
+                    </div>
+                </article>
+            </div>
+        }
+    </div>
+}

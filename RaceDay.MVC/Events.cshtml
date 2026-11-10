@@ -1,0 +1,49 @@
+@model List<OrganiserEventDto>
+@{
+    ViewData["Title"] = "Manage events";
+}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+    <h1 class="rd-page-title m-0">MANAGE <span>EVENTS</span></h1>
+    <a asp-action="CreateEvent" class="btn btn-rd">+ New event</a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="rd-empty">
+        <h3>No events yet</h3>
+        <p>Create your first event to get started.</p>
+        <a asp-action="CreateEvent" class="btn btn-rd">Create an event</a>
+    </div>
+}
+else
+{
+    <div class="row g-4">
+        @foreach (var e in Model.OrderBy(e => e.EventDate))
+        {
+            <div class="col-md-6 col-xl-4">
+                <article class="rd-event-card">
+                    @await Html.PartialAsync("_EventBanner", (e.BannerUrl, e.EventType, "rd-card-banner"))
+                    <div class="rd-event-body">
+                        <div class="rd-tags">
+                            <span class="rd-tag rd-tag-@e.EventType.ToLowerInvariant()">@e.EventType</span>
+                            <span class="rd-tag rd-tag-dist">@e.Distance.ToString("0.##") km</span>
+                            <span class="rd-tag rd-tag-dist">@e.EnrolmentCount enrolled</span>
+                        </div>
+                        <h3>@e.EventName</h3>
+                        <p class="rd-meta">@e.EventDate.ToString("ddd, d MMM yyyy") &middot; @e.Location</p>
+                        <div class="rd-actions">
+                            <a asp-action="Categories" asp-route-eventId="@e.EventID" class="btn btn-sm btn-rd-outline-dark">Categories</a>
+                            <a asp-action="Enrolments" asp-route-eventId="@e.EventID" class="btn btn-sm btn-rd-outline-dark">Enrolments</a>
+                            <a asp-action="Results" asp-route-eventId="@e.EventID" class="btn btn-sm btn-rd-outline-dark">Results</a>
+                            <a asp-action="EditEvent" asp-route-id="@e.EventID" class="btn btn-sm btn-rd">Edit</a>
+                            <form asp-action="DeleteEvent" method="post" class="d-inline" data-confirm="Delete '@e.EventName'? This cannot be undone.">
+                                <input type="hidden" name="id" value="@e.EventID" />
+                                <button type="submit" class="btn btn-sm btn-danger-soft">Delete</button>
+                            </form>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        }
+    </div>
+}

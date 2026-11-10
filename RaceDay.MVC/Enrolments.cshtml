@@ -1,0 +1,50 @@
+@model EnrolmentsVm
+@{
+    ViewData["Title"] = "Enrolments";
+}
+<a asp-action="Events" class="rd-back">&larr; Back to events</a>
+<h1 class="rd-page-title">ENROLMENTS <span>&middot; @Model.Event.EventName</span></h1>
+<p class="rd-meta">@Model.Event.EventDate.ToString("d MMM yyyy") &middot; @Model.Event.Location &middot; @Model.Enrolments.Count enrolled</p>
+
+@if (!Model.Enrolments.Any())
+{
+    <div class="rd-empty">
+        <h3>No enrolments yet</h3>
+        <p>Participants who enter this event will appear here.</p>
+    </div>
+}
+else
+{
+    <div class="rd-card p-0 table-responsive">
+        <table class="table rd-table align-middle mb-0">
+            <thead>
+                <tr><th>Participant</th><th>Category</th><th>Enrolled on</th><th>Status</th><th class="text-end">Update status</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var en in Model.Enrolments)
+                {
+                    <tr>
+                        <td>
+                            <span class="fw-semibold">@en.ParticipantName</span>
+                            <div class="small text-muted">@en.Email</div>
+                        </td>
+                        <td>@en.CategoryName</td>
+                        <td>@en.RegistrationDate.ToString("d MMM yyyy")</td>
+                        <td>@await Html.PartialAsync("_Status", en.Status)</td>
+                        <td class="text-end text-nowrap">
+                            @foreach (var s in new[] { "Confirmed", "Pending", "Cancelled" }.Where(s => s != en.Status))
+                            {
+                                <form asp-action="SetStatus" method="post" class="d-inline">
+                                    <input type="hidden" name="id" value="@en.RegistrationID" />
+                                    <input type="hidden" name="eventId" value="@Model.Event.EventID" />
+                                    <input type="hidden" name="status" value="@s" />
+                                    <button type="submit" class="btn btn-sm btn-rd-outline-dark">@s</button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
